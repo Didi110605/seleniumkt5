@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-
 def login_admin(driver):
     driver.get('https://demo.opencart.com/admin/')
     driver.find_element(By.ID, 'input-username').send_keys('demo')
@@ -12,9 +11,8 @@ def login_admin(driver):
     time.sleep(2)
     try:
         driver.find_element(By.CSS_SELECTOR, '.btn-close').click()
-    except:
+    except Exception:
         pass
-
 
 def create_category(driver):
     driver.find_element(By.ID, 'menu-catalog').click()
@@ -24,7 +22,6 @@ def create_category(driver):
     driver.find_element(By.ID, 'input-meta-title1').send_keys('Devices Meta')
     driver.find_element(By.CSS_SELECTOR, 'button[data-original-title="Save"]').click()
     time.sleep(2)
-
 
 def add_products(driver):
     driver.find_element(By.ID, 'menu-catalog').click()
@@ -44,7 +41,6 @@ def add_products(driver):
         driver.find_element(By.CSS_SELECTOR, 'button[data-original-title="Save"]').click()
         time.sleep(2)
 
-
 def check_products_on_main(driver, expected_products):
     driver.get('https://demo.opencart.com/')
     for name in expected_products:
@@ -55,7 +51,6 @@ def check_products_on_main(driver, expected_products):
         time.sleep(2)
         assert name in driver.page_source, f"{name} not found on main page"
         print(f"{name} is visible on main page ✅")
-
 
 def delete_products(driver, products_to_delete):
     driver.get('https://demo.opencart.com/admin/')
@@ -73,9 +68,8 @@ def delete_products(driver, products_to_delete):
             driver.switch_to.alert.accept()
             time.sleep(2)
             print(f"{name} deleted ✅")
-        except:
+        except Exception:
             print(f"{name} not found or already deleted ⚠️")
-
 
 def final_check(driver, present_products, absent_products):
     driver.get('https://demo.opencart.com/')
@@ -87,30 +81,25 @@ def final_check(driver, present_products, absent_products):
         time.sleep(2)
         assert name in driver.page_source, f"{name} should be present but not found"
         print(f"{name} is still visible ✅")
-
+    
     for name in absent_products:
         search_box = driver.find_element(By.NAME, 'search')
-        search_box.clear()
+                search_box.clear()
         search_box.send_keys(name)
         search_box.send_keys(Keys.RETURN)
         time.sleep(2)
-        assert name not in driver.page_source, f"{name} should be deleted but still found"
-        print(f"{name} is correctly removed ✅")
+        assert name not in driver.page_source, f"{name} should not be present but found"
+        print(f"{name} is not visible anymore ❌")
 
 
-def main():
-    driver = webdriver.Chrome()
-    driver.maximize_window()
+if __name__ == '__main__':
+    driver = webdriver.Chrome()  # Или используйте другой драйвер
     try:
         login_admin(driver)
         create_category(driver)
         add_products(driver)
         check_products_on_main(driver, ['Mouse 1', 'Mouse 2', 'Keyboard 1', 'Keyboard 2'])
-        delete_products(driver, ['Mouse 1', 'Keyboard 1'])
-        final_check(driver, ['Mouse 2', 'Keyboard 2'], ['Mouse 1', 'Keyboard 1'])
+        delete_products(driver, ['Mouse 1', 'Mouse 2'])
+        final_check(driver, ['Keyboard 1', 'Keyboard 2'], ['Mouse 1', 'Mouse 2'])
     finally:
         driver.quit()
-        print("Test completed and browser closed.")
-
-if __name__ == "__main__":
-    main()
